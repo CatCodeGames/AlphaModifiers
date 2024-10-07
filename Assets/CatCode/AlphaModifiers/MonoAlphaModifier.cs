@@ -7,12 +7,6 @@ namespace CatCode.AlphaModifiers
     [ExecuteInEditMode]
     public class MonoAlphaModifier : MonoBehaviour, IAlphaModifier
     {
-        private List<MonoAlphaModifier> GetCollection()
-            => ListPool<MonoAlphaModifier>.Get();
-
-        private void ReleaseCollection(List<MonoAlphaModifier> list)
-            => ListPool<MonoAlphaModifier>.Release(list);
-
         [SerializeField] private MonoAlphaModifier _parent;
         [SerializeField] private List<MonoAlphaModifier> _children = new();
         [Space]
@@ -26,13 +20,21 @@ namespace CatCode.AlphaModifiers
             {
                 _alpha = value;
                 var totalAlpha = TotalAlpha;
-                UpdateAlpha(totalAlpha);
+                UpdateStrategiesAlpha(totalAlpha);
                 for (int i = 0; i < _children.Count; i++)
-                    _children[i].Alpha = totalAlpha;
+                    _children[i].UpdateAlpha();
             }
         }
 
-        protected void UpdateAlpha(float alpha)
+        private void UpdateAlpha()
+        {
+            var totalAlpha = TotalAlpha;
+            UpdateStrategiesAlpha(totalAlpha);
+            for (int i = 0; i < _children.Count; i++)
+                _children[i].UpdateAlpha();
+        }
+
+        protected void UpdateStrategiesAlpha(float alpha)
         {
             for (int i = 0; i < _alphaStrategies.Length; i++)
                 _alphaStrategies[i].SetAlpha(alpha);
@@ -57,14 +59,28 @@ namespace CatCode.AlphaModifiers
             SetParent(parent.GetComponentInParent<MonoAlphaModifier>(true));
         }
 
+        public void FindChildren()
+        {
+            _children.Clear();
+            var components = GetComponentsInChildren<MonoAlphaModifier>();
+            if (components == null || components.Length == 0)
+                return;
+            for (int i = 0; i < components.Length; i++)
+            {
+                var component = components[i];
+                if (component.gameObject == gameObject)
+                    continue;
+                _children.Add(component);
+                component.SetParent(this);
+            }
+        }
+
         public void RemoveParent()
             => SetParent(null);
 
 
         private void AddChild(MonoAlphaModifier alphaModifier)
         {
-            if (_children == null)
-                _children = GetCollection();
             if (_children.Contains(alphaModifier))
                 return;
             _children.Add(alphaModifier);
@@ -73,16 +89,12 @@ namespace CatCode.AlphaModifiers
         private void RemoveChild(MonoAlphaModifier alphaModifier)
         {
             _children.Remove(alphaModifier);
-            if (_children.Count == 0)
-            {
-                ReleaseCollection(_children);
-                _children = null;
-            }
         }
 
         private void Awake()
         {
             FindParent();
+            FindChildren();
         }
 
         private void OnDestroy()
@@ -91,25 +103,27 @@ namespace CatCode.AlphaModifiers
             if (_children == null)
                 return;
 
-            var children = UnityEngine.Pool.ListPool<MonoAlphaModifier>.Get();
-            children.AddRange(_children);
-            foreach (var child in children)                
-                    child.SetParent(null);
-            ReleaseCollection(_children);
+            var tempChildrenList = ListPool<MonoAlphaModifier>.Get();
+            tempChildrenList.AddRange(_children);
+            foreach (var child in tempChildrenList)
+                child.SetParent(null);
+            ListPool<MonoAlphaModifier>.Release(tempChildrenList);
         }
 
-        private void Update()
-        {
-            if (Application.isPlaying)
-                Alpha = _alpha;
-        }
+
 
         protected void Reset()
         {
             FindParent();
+            FindChildren();
         }
 
 #if UNITY_EDITOR
+        private void Update()
+        {
+            if (Application.isPlaying)
+                UpdateAlpha();
+        }
 
         [ContextMenu("Alpha for this Branch")]
         private void GetAllStrategies()

@@ -7,6 +7,7 @@ namespace CatCode.AlphaModifiers
     [ExecuteInEditMode]
     public class MonoAlphaModifier : MonoBehaviour, IAlphaModifier
     {
+        [SerializeField] private bool _updateLinksOnAwake;
         [SerializeField] private MonoAlphaModifier _parent;
         [SerializeField] private List<MonoAlphaModifier> _children = new();
         [Space]
@@ -93,8 +94,11 @@ namespace CatCode.AlphaModifiers
 
         private void Awake()
         {
-            FindParent();
-            FindChildren();
+            if (!Application.isPlaying || _updateLinksOnAwake)
+            {
+                FindParent();
+                FindChildren();
+            }
         }
 
         private void OnDestroy()
@@ -110,14 +114,6 @@ namespace CatCode.AlphaModifiers
             ListPool<MonoAlphaModifier>.Release(tempChildrenList);
         }
 
-
-
-        protected void Reset()
-        {
-            FindParent();
-            FindChildren();
-        }
-
 #if UNITY_EDITOR
         private void Update()
         {
@@ -128,15 +124,18 @@ namespace CatCode.AlphaModifiers
         [ContextMenu("Alpha for this Branch")]
         private void GetAllStrategies()
         {
+            FindParent();
+            FindChildren();
             _alphaStrategies = AlphaModifierTools.GetStrategiesFromBranch(gameObject);
         }
 
         [ContextMenu("Alpha for this Object")]
         private void GetCurrentStrategy()
         {
+            FindParent();
+            FindChildren();
             _alphaStrategies = new[] { AlphaModifierTools.GetAlphaModifierStrategy(gameObject) };
         }
-
 #endif
     }
 }

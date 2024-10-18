@@ -7,12 +7,12 @@ namespace CatCode.AlphaModifiers
     [ExecuteInEditMode]
     public class MonoAlphaModifier : MonoBehaviour, IAlphaModifier
     {
-        [SerializeField] private bool _updateLinksOnAwake;
         [SerializeField] private MonoAlphaModifier _parent;
         [SerializeField] private List<MonoAlphaModifier> _children = new();
         [Space]
         [SerializeField, Range(0, 1)] private float _alpha = 1f;
         [SerializeReference] private IAlphaModifierStrategy[] _alphaStrategies = new IAlphaModifierStrategy[0];
+
 
         public float Alpha
         {
@@ -27,22 +27,6 @@ namespace CatCode.AlphaModifiers
             }
         }
 
-        private void UpdateAlpha()
-        {
-            var totalAlpha = TotalAlpha;
-            UpdateStrategiesAlpha(totalAlpha);
-            for (int i = 0; i < _children.Count; i++)
-                _children[i].UpdateAlpha();
-        }
-
-        protected void UpdateStrategiesAlpha(float alpha)
-        {
-            for (int i = 0; i < _alphaStrategies.Length; i++)
-                _alphaStrategies[i].SetAlpha(alpha);
-        }
-
-        public float TotalAlpha => _alpha * (_parent != null ? _parent.TotalAlpha : 1f);
-
         public void SetParent(MonoAlphaModifier parent)
         {
             if (_parent != null && _parent != parent)
@@ -51,6 +35,9 @@ namespace CatCode.AlphaModifiers
             if (_parent != null)
                 _parent.AddChild(this);
         }
+
+        public void RemoveParent()
+            => SetParent(null);
 
         public void FindParent()
         {
@@ -76,8 +63,24 @@ namespace CatCode.AlphaModifiers
             }
         }
 
-        public void RemoveParent()
-            => SetParent(null);
+
+
+        private float TotalAlpha => _alpha * (_parent != null ? _parent.TotalAlpha : 1f);
+
+        private void UpdateAlpha()
+        {
+            var totalAlpha = TotalAlpha;
+            UpdateStrategiesAlpha(totalAlpha);
+            for (int i = 0; i < _children.Count; i++)
+                _children[i].UpdateAlpha();
+        }
+
+        private void UpdateStrategiesAlpha(float alpha)
+        {
+            for (int i = 0; i < _alphaStrategies.Length; i++)
+                _alphaStrategies[i].SetAlpha(alpha);
+        }
+
 
 
         private void AddChild(MonoAlphaModifier alphaModifier)
@@ -92,14 +95,7 @@ namespace CatCode.AlphaModifiers
             _children.Remove(alphaModifier);
         }
 
-        private void Awake()
-        {
-            if (!Application.isPlaying || _updateLinksOnAwake)
-            {
-                FindParent();
-                FindChildren();
-            }
-        }
+
 
         private void OnDestroy()
         {
@@ -115,27 +111,30 @@ namespace CatCode.AlphaModifiers
         }
 
 #if UNITY_EDITOR
+
+        private void Awake()
+        {
+            if (Application.isPlaying)
+                return;
+            FindParent();
+            FindChildren();
+        }
+
         private void Update()
         {
             if (Application.isPlaying)
                 UpdateAlpha();
         }
 
+
         [ContextMenu("Alpha for this Branch")]
-        private void GetAllStrategies()
-        {
-            FindParent();
-            FindChildren();
-            _alphaStrategies = AlphaModifierTools.GetStrategiesFromBranch(gameObject);
-        }
+        public void GetAllStrategies()
+            => _alphaStrategies = AlphaModifierTools.GetStrategiesFromBranch(gameObject);
 
         [ContextMenu("Alpha for this Object")]
-        private void GetCurrentStrategy()
-        {
-            FindParent();
-            FindChildren();
-            _alphaStrategies = new[] { AlphaModifierTools.GetAlphaModifierStrategy(gameObject) };
-        }
+        public void GetCurrentStrategy()
+            => _alphaStrategies = new[] { AlphaModifierTools.GetAlphaModifierStrategy(gameObject) };
+
 #endif
     }
 }

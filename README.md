@@ -1,45 +1,92 @@
-# 1 Description
-`MonoAlphaModifier` lets you control the transparency of various objects, including sprites and particle systems. Its logic is similar to Unity's `CanvasGroup`: it allows you to adjust the alpha value for a group of objects simultaneously, simplifying the management of visual effects.
+# **1. Description**
 
-- Controls the transparency of multiple objects within the `MonoAlphaModifier`.
-- Supports nested objects with `MonoAlphaModifier` and combines their alpha values for child objects.
+`MonoAlphaModifier` is a component for controlling the transparency of visual objects in Unity.
 
-# 2 How to Use
-## 2.1 UnityEditor
-Add the MonoAlphaModifier component to an object.
+- It manages the transparency of any supported visual components through automatically collected handlers (strategies).
+- It can control a single object or an entire hierarchy branch.
+- It supports hierarchical behavior: a parent’s alpha value affects all child modifiers.
 
-Choose one of the two options in the component's context menu:
+---
 
-`Alpha for this Object` - controls the transparency only for the current object.
+# **2.2 Runtime Behavior**
 
-`Alpha for this Branch` - controls the transparency for the current object and all its child objects.
+`MonoAlphaModifier` automatically maintains a correct hierarchy:
 
-## 2.2 Scripts
-To control transparency, use the `Alpha` property of the `MonoAlphaModifier` component.
+- When created, enabled, or moved, the component searches for a parent `MonoAlphaModifier`.
+- When removed or re‑parented, all links are rebuilt correctly.
+- Any hierarchy change immediately updates the transparency of all affected objects.
 
-To add a new `MonoAlphaModifier` object to the existing hierarchy at runtime, use the methods `FindParent()` or `SetParent(MonoAlphaModifier parent)`.
+Transparency logic:
 
-To remove an object from the hierarchy, use the `RemoveParent()` method.
+- Each collected visual component receives its own handler that knows how to apply alpha (e.g., SpriteRenderer, ParticleSystem, Image, etc.).
+- The modifier’s own `Alpha` value is multiplied by the parent’s alpha, forming `TotalAlpha`, which is applied to all collected handlers.
+
+---
+
+# **3. Usage**
+
+## **3.1 Editor**
+
+1. Add the `MonoAlphaModifier` component to a GameObject.
+2. In the component’s context menu, choose:
+   - **Collect for Object** — collect handlers only for this object.
+   - **Collect for Branch** — collect handlers for this object and all its children.
+3. In the `Alpha Strategies` list, adjust transparency limits for collected components if needed.
+
+## **3.2 Code**
+
+To control transparency from scripts, simply assign a value to the `Alpha` property.
+
+- **Alpha** — the modifier’s own transparency value.
+- **TotalAlpha** — the final transparency value after applying all parent modifiers.
+
+To add support for a new type of visual component:
+
+1. Create a class implementing `IAlphaModifierStrategy`.
+2. Add the corresponding `builder` to `StrategyBuildContext` so it is automatically included during component scanning.
+
+---
 
 
-# 1. Описание
-MonoAlphaModifier позволяет контролировать прозрачность различных объектов, включая спрайты и системы частиц. Его логика схожа с `CanvasGroup` в Unity: он позволяет изменять альфа-значение для группы объектов одновременно, что упрощает управление визуальными эффектами.
 
-- Позволяет управлять прозрачностью сразу нескольких объектов, которые находятся внутри `MonoAlphaModifier`.
-- Поддерживает вложенные объекты с `MonoAlphaModifier` и комбинирует их альфа-значения для дочерних объектов.
+# **1. Описание**
 
-# 2. Как использовать.
-## 2.1 UnityEditor
+MonoAlphaModifier — компонент для управления прозрачностью визуальных объектов в Unity.
+- Управляет прозрачностью любых визуальных компонентов через собранные обработчики (стратегии).
+- Может контролировать конкретный объект или всю ветку (в иерархии).
+- Поддерживает иерархию: альфа родителя влияет на дочерние модификаторы.
 
-1. Добавить компонент `MonoAlphaModifier` на объект
-2. Выбрать одну из двух опций в контекстном меню компонента
-2.1 `Alpha for this Object` - компонент будет контролировать прозрачность только для текущего объекта, к которому прикреплён
-2.2 `Alpha for this Branch` - компонент будет контролировать прозрачность для текущего и всех дочерних объектов.
+---
 
-## 2.2 Scripts
+# **2. Поведение в рантайме**
 
-Для управления прозрачностью используйте свойство `Alpha` компонента `MonoAlphaModifier`.
+`MonoAlphaModifier` автоматически поддерживает иерархию:
+- При создании, активации или перемещении компонент ищет родительский `MonoAlphaModifier`.
+- При удалении связи так же корректно перестраиваются.
+- При изменении иерархии прозрачность объектов сразу же обновляется, учитывая новую иерархию.
 
-Если во время выполнения необходимо добавить новый объект `MonoAlphaModifier` в существующую иерархию, используйте методы `FindParent()` или `SetParent(MonoAlphaModifier parent)`.
+Логика изменения прозрачности:
+- Для каждого собранного компонента создаётся свой обработчик-стратегия, знающий как менять его прозрачность, будто то Sprite, ParticleSystem или Image.
+- Собственное значение `Alpha` умножается на значение родителя формируя `TotalAlpha`, которая применяется как множитель для всех собранных обработчиков.
 
-Для удаления объекта из иерархии используйте метод `RemoveParent()`.
+---
+
+# **3. Использование**
+
+## **3.1 Редактор**
+1. Добавить компонент `MonoAlphaModifier` на объект.
+2. Выбрать в контекстом меню компонента:
+2.1 `Collect for Object` - для контроля прозрачности текущего объекта
+2.2 `Collect for Branch` - для контроля прозрачности текущего объекта и дочерних.
+3. В списке `Alpha Strategies` при необходимости указать ограничение прозрачности для всех собранных компонентов.
+
+## **3.2 Код**
+
+Для управления прозрачностью через скрипты достаточно задать значение свойства `Alpha`.
+- `Alpha` — собственное значение модификатора.
+- `TotalAlpha` — итоговое значение с учётом всех родительских модификаторов.
+Чтобы добавить поддержку нового типа визуального компонента:
+1. Создать класс, реализующий `IAlphaModifierStrategy`.
+2. Добавить соответствующий `builder` в `StrategyBuildContext`, чтобы он автоматически собирался при сканировании объектов.
+
+---

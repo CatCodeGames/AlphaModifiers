@@ -1,8 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Pools;
 
 namespace CatCode.AlphaModifiers
 {

@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace CatCode.Common.EditorTools
+namespace CatCode.AlphaModifiers.EditorTools
 {
     [CustomPropertyDrawer(typeof(MinMaxFloat))]
     public class MinMaxFloatDrawer : PropertyDrawer

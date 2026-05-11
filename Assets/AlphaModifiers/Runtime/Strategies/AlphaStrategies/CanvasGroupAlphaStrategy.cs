@@ -1,5 +1,4 @@
-﻿using CatCode.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,7 +13,7 @@ namespace CatCode.AlphaModifiers
             public CanvasGroup canvasGroup;
             public MinMaxFloat alpha;
 
-            public CanvasGroupTarget(CanvasGroup canvasGroup, Common.MinMaxFloat alpha)
+            public CanvasGroupTarget(CanvasGroup canvasGroup, MinMaxFloat alpha)
             {
                 this.canvasGroup = canvasGroup;
                 this.alpha = alpha;

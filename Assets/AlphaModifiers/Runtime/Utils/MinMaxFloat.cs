@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CatCode.Common
+namespace CatCode.AlphaModifiers
 {
     [Serializable]
     public struct MinMaxFloat

@@ -1,0 +1,17 @@
+{
+  "name": "com.catcode.alpha-modifiers",
+  "version": "1.0.0",
+  "displayName": "AlphaModifiers",
+  "description": " Alpha channel management for Unity objects with hierarchy support",
+  "unity": "2021.3",
+  "author": {
+    "name": "CatCode",
+    "url": "https://github.com/CatCodeGames"
+  },
+  "license": "MIT",
+  "keywords": [
+    "unity",
+    "alpha"
+  ],
+  "dependencies": {}
+}

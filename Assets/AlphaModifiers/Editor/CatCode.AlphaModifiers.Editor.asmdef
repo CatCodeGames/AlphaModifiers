@@ -1,0 +1,18 @@
+{
+    "name": "CatCode.AlphaModifiers.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:cfa4952a06eabdf449c31a9add2e8330"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

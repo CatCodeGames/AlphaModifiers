@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine.Pool;
 
-namespace UnityEngine.Pools 
+namespace CatCode.AlphaModifiers 
 {
     public class StackPool<T>
     {

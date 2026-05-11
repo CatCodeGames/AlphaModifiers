@@ -47,7 +47,9 @@ To add support for a new type of visual component:
 
 
 ## Installation
+
 UPM - `https://github.com/CatCodeGames/AlphaModifiers.git?path=Assets/AlphaModifiers`
+
 ---
 
 
